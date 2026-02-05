@@ -136,7 +136,7 @@
     </div>
 
     <div class="search-box">
-        <input id="protocolo" type="text" placeholder="Digite o número do protocolo">
+        <input id="protocolo" type="text" placeholder="Digite o número do protocolo. Ex. (2026-0001)">
         <button onclick="buscar()">Buscar andamento</button>
     </div>
 
@@ -209,7 +209,7 @@ function buscar() {
     .then(r => r.json())
     .then(d => {
         if (!d.encontrado) {
-            msg.innerHTML = "<span style='color:#d9534f'>Protocolo não encontrado.</span>";
+            msg.innerHTML = "<span style='color:#d9534f'>Protocolo não encontrado. Verifique o número infomado.</span>";
             return;
         }
 
