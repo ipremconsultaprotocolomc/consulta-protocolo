@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Protocolo - IPREM</title>
+
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f4f7f9;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .container {
+            background: #ffffff;
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .header-section {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 22px;
+            color: #003366;
+            margin: 0;
+            font-weight: 800;
+        }
+
+        .subtitulo {
+            font-size: 12px;
+            color: #888;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 600;
+        }
+
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        input, button {
+            width: 100%;
+            height: 55px;
+            font-size: 16px;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        input {
+            text-align: center;
+            border: 1.5px solid #003366;
+            color: #333;
+            outline: none;
+        }
+
+        button {
+            background: #003366;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background: #002244;
+        }
+
+        .msg {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #003366;
+        }
+
+        #resultado {
+            text-align: left;
+            margin-top: 35px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            display: none;
+        }
+
+        .campo {
+            margin-bottom: 20px;
+        }
+
+        .titulo-campo {
+            font-size: 11px;
+            color: #003366;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .valor {
+            font-size: 15px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #003366;
+            color: white;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header-section">
+        <h1>CONSULTA DE PROTOCOLO</h1>
+        <div class="subtitulo">
+            INSTITUTO DE PREVIDÊNCIA MUNICIPAL DE MOGI DAS CRUZES
+        </div>
+    </div>
+
+    <div class="search-box">
+        <input id="protocolo" type="text" placeholder="Digite o número do protocolo">
+        <button onclick="buscar()">Buscar andamento</button>
+    </div>
+
+    <div id="mensagem" class="msg"></div>
+
+    <div id="resultado">
+        <div class="campo">
+            <div class="titulo-campo">Número do Protocolo</div>
+            <div class="valor" id="r-protocolo"></div>
+        </div>
+
+        <div class="campo">
+            <div class="titulo-campo">Nome do Segurado</div>
+            <div class="valor" id="r-nome"></div>
+        </div>
+
+        <div class="campo">
+            <div class="titulo-campo">Assunto</div>
+            <div class="valor" id="r-assunto"></div>
+        </div>
+
+        <div class="campo">
+            <div class="titulo-campo">Status Atual</div>
+            <div class="valor">
+                <span class="status-badge" id="r-status"></span>
+            </div>
+        </div>
+
+        <div class="campo">
+            <div class="titulo-campo">Etapa Atual</div>
+            <div class="valor" id="r-andamento"></div>
+        </div>
+
+        <div class="campo">
+            <div class="titulo-campo">Data da Última Atualização</div>
+            <div class="valor" id="r-data"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+function formatarData(numeroExcel) {
+    if (!numeroExcel) return "—";
+    if (!isNaN(numeroExcel)) {
+        const data = new Date((numeroExcel - 25569) * 86400 * 1000);
+        return data.toLocaleDateString("pt-BR");
+    }
+    return numeroExcel;
+}
+
+function buscar() {
+    const protocolo = document.getElementById("protocolo").value.trim();
+    const msg = document.getElementById("mensagem");
+    const res = document.getElementById("resultado");
+
+    if (!protocolo) {
+        msg.innerHTML = "<span style='color:#d9534f'>Digite um protocolo.</span>";
+        return;
+    }
+
+    msg.innerText = "Buscando informações...";
+    res.style.display = "none";
+
+    fetch("https://default57254ada512e48c695290291888599.bf.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/d6e3a108b0c74b569378f178f2224d6b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aPsC7E5ndocAZVAJF-KwyW6_-pRx5FO9OlOVgxM8HPo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ protocolo })
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.encontrado) {
+            msg.innerHTML = "<span style='color:#d9534f'>Protocolo não encontrado.</span>";
+            return;
+        }
+
+        msg.innerText = "";
+        res.style.display = "block";
+
+        document.getElementById("r-protocolo").innerText = d.dados.PROTOCOLO_PUBLICO || protocolo;
+        document.getElementById("r-nome").innerText = d.dados["NOME "] || "—";
+        document.getElementById("r-assunto").innerText = d.dados.ASSUNTO || "—";
+        document.getElementById("r-status").innerText = d.dados["STATUS PADRÃO"] || "ABERTO";
+        document.getElementById("r-andamento").innerText = d.dados["ANDAMENTO DO PROCESSO"] || "—";
+        document.getElementById("r-data").innerText = formatarData(d.dados["DATA DO ANDAMENTO"]);
+    })
+    .catch(() => {
+        msg.innerHTML = "<span style='color:#d9534f'>Erro de conexão.</span>";
+    });
+}
+</script>
+
+</body>
+</html>
