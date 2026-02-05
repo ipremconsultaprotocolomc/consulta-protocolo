@@ -25,6 +25,13 @@
             text-align: center;
         }
 
+        /* LOGO */
+        .logo {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 25px;
+        }
+
         .header-section {
             margin-bottom: 30px;
         }
@@ -128,6 +135,9 @@
 
 <div class="container">
 
+    <!-- LOGO -->
+    <img src="assets/logo-iprem.png" alt="IPREM Mogi das Cruzes" class="logo">
+
     <div class="header-section">
         <h1>CONSULTA DE PROTOCOLO</h1>
         <div class="subtitulo">
@@ -209,7 +219,7 @@ function buscar() {
     .then(r => r.json())
     .then(d => {
         if (!d.encontrado) {
-            msg.innerHTML = "<span style='color:#d9534f'>Protocolo não encontrado. Verifique o número infomado.</span>";
+            msg.innerHTML = "<span style='color:#d9534f'>Protocolo não encontrado. Verifique o número informado.</span>";
             return;
         }
 
